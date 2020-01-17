@@ -16,17 +16,20 @@ class _NewTransactionState extends State<NewTransaction> {
   DateTime _selectedDate;
 
   void _submitData() {
+    if (_amountController.text.isEmpty) return;
     final enteredTitle = _titleController.text;
     final enteredAmount = _amountController.text;
 
-    if (enteredTitle.isEmpty || enteredAmount.length <= 0) return;
+    if (enteredTitle.isEmpty ||
+        enteredAmount.length <= 0 ||
+        _selectedDate == null) return;
 
-    widget.addTx(enteredTitle, double.parse(enteredAmount));
+    widget.addTx(enteredTitle, double.parse(enteredAmount), _selectedDate);
     Navigator.of(context).pop();
   }
 
   Future<DateTime> _presentDatePicker(BuildContext context) async {
-    return showDatePicker(
+    final date = showDatePicker(
       context: context,
       initialDate: DateTime.now(),
       firstDate: DateTime(2020),
@@ -40,6 +43,7 @@ class _NewTransactionState extends State<NewTransaction> {
         });
       }
     });
+    return date;
   }
 
   @override
@@ -73,15 +77,17 @@ class _NewTransactionState extends State<NewTransaction> {
                   Text(_selectedDate == null
                       ? 'No Date Chosen'
                       : DateFormat.yMd().format(_selectedDate)),
-                  FlatButton(
-                      textColor: theme.primaryColor,
-                      child: Text(
-                        'Choose Date',
-                        style: TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      onPressed: () {
-                        _presentDatePicker(context);
-                      }),
+                  Expanded(
+                    child: FlatButton(
+                        textColor: theme.primaryColor,
+                        child: Text(
+                          'Choose Date',
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                        ),
+                        onPressed: () {
+                          _presentDatePicker(context);
+                        }),
+                  ),
                 ],
               ),
             ),

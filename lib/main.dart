@@ -14,7 +14,6 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
         debugShowCheckedModeBanner: false,
         home: HomePage(),
-        title: 'Expense Tracker',
         theme: ThemeData.light().copyWith(
           primaryColor: Colors.blue[900],
           accentColor: Colors.white,
@@ -59,15 +58,22 @@ class _HomePageState extends State<HomePage> {
     }).toList();
   }
 
-  void _addNewTransaction(String txTitle, double txAmount) {
+  void _addNewTransaction(
+      String txTitle, double txAmount, DateTime chosenDate) {
     final newTx = Transaction(
       title: txTitle,
       amount: txAmount,
-      date: DateTime.now(),
+      date: chosenDate,
       id: DateTime.now().toString(),
     );
     setState(() {
       _userTransactions.add(newTx);
+    });
+  }
+
+  void _deleteTransaction(String id) {
+    setState(() {
+      _userTransactions.removeWhere((tx) => tx.id == id);
     });
   }
 
@@ -84,28 +90,38 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'Expense App',
-          style: GoogleFonts.alata(
-              textStyle: TextStyle(fontWeight: FontWeight.bold)),
-        ),
-        actions: <Widget>[
-          IconButton(
-            icon: Icon(Icons.add_circle),
-            onPressed: () {
-              _showAddModalSheet(context);
-            },
-          )
-        ],
+    final mediaQuery = MediaQuery.of(context);
+    final appbar = AppBar(
+      title: Text(
+        'Expense App',
+        style: GoogleFonts.alata(
+            textStyle: TextStyle(fontWeight: FontWeight.bold)),
       ),
+      actions: <Widget>[
+        IconButton(
+          icon: Icon(Icons.add_circle),
+          onPressed: () {
+            _showAddModalSheet(context);
+          },
+        )
+      ],
+    );
+    return Scaffold(
+      appBar: appbar,
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
-            Chart(_recentTransactions),
-            TransactionList(_userTransactions),
+            Container(
+                height: (mediaQuery.size.height -
+                        appbar.preferredSize.height -
+                        mediaQuery.padding.top) *
+                    .4,
+                child: Chart(_recentTransactions)),
+            Container(
+                height:
+                    (mediaQuery.size.height - appbar.preferredSize.height) * .6,
+                child: TransactionList(_userTransactions, _deleteTransaction)),
           ],
         ),
       ),
